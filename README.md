@@ -1,6 +1,8 @@
-# Todo Platform
+# TaskFlow — Todo Platform
 
 A full-stack, AI-agent-enabled todo application built through 5 progressive development phases — from a CLI console app to a cloud-native, event-driven platform with an AI chatbot.
+
+**Repo:** https://github.com/a-creativemind/hackathon2-todo
 
 ---
 
@@ -8,6 +10,10 @@ A full-stack, AI-agent-enabled todo application built through 5 progressive deve
 
 | Phase | Component | URL |
 |-------|-----------|-----|
+| Local | **Todo App** | http://localhost:3000 |
+| Local | **AI Chatbot** | http://localhost:3001 |
+| Local | **Backend API** | http://localhost:8000 |
+| Local | **API Docs** | http://localhost:8000/docs |
 | II — Fullstack | Frontend (Vercel) | _Deploy via [Vercel instructions](#phase-ii-deployment)_ |
 | II — Fullstack | Backend API | _Deploy via [Railway/Render instructions](#phase-ii-deployment)_ |
 | III–V — AI Chatbot | Chatbot UI | _Deploy via [chatbot instructions](#phase-iiiv-chatbot-deployment)_ |
@@ -26,7 +32,7 @@ A full-stack, AI-agent-enabled todo application built through 5 progressive deve
 | **II** | Fullstack Web App | FastAPI + Next.js + PostgreSQL | ✅ Complete (60/61 tasks) |
 | **III** | AI Agent + MCP | OpenAI Agents SDK + FastMCP | ✅ P1 Complete |
 | **IV** | Cloud Native | Docker + Kubernetes + Helm | ✅ Containerized |
-| **V** | Event-Driven + Chatbot | Kafka + Dapr + AI Chatbot | 🔄 In Progress |
+| **V** | Event-Driven + AI Chatbot | Kafka + Dapr + Next.js Chatbot | 🔄 In Progress |
 
 ---
 
@@ -64,13 +70,14 @@ desktop-todo/
 │   ├── Dockerfile               # Multi-stage production build
 │   └── requirements.txt         # Python dependencies
 │
-├── frontend/                    # Phase II–IV: Next.js web frontend
+├── frontend/                    # Phase II–IV: Next.js web frontend (port 3000)
 │   ├── app/                     # Next.js 14 App Router
-│   │   ├── layout.tsx           # Root layout
-│   │   └── page.tsx             # Todo list page
+│   │   ├── layout.tsx           # Root layout + NavBar
+│   │   ├── page.tsx             # Todo list page
+│   │   └── globals.css          # Violet/indigo theme + animations
 │   ├── components/              # React UI components
 │   │   ├── TodoItem.tsx         # Todo card (priority badge, tags, due date)
-│   │   └── NavBar.tsx           # Navigation bar
+│   │   └── NavBar.tsx           # Navigation bar (violet/indigo)
 │   ├── lib/
 │   │   └── api.ts               # Type-safe API client
 │   ├── types/
@@ -84,8 +91,11 @@ desktop-todo/
 │   ├── cli.py                   # Interactive CLI interface
 │   └── config.py                # Settings (API key, backend URL)
 │
-├── chatbot-frontend/            # Phase V: Next.js AI chatbot UI
-│   ├── app/                     # App Router pages
+├── chatbot-frontend/            # Phase V: Next.js AI chatbot UI (port 3001)
+│   ├── app/
+│   │   ├── layout.tsx           # Root layout + nav
+│   │   ├── page.tsx             # Chat landing + interface
+│   │   └── globals.css          # Violet/indigo theme + animations
 │   └── components/
 │       └── ChatInterface.tsx    # Chat window with todo display
 │
@@ -133,6 +143,8 @@ desktop-todo/
 │   ├── memory/constitution.md   # Project principles (v2.1.0)
 │   └── templates/               # PHR, spec, plan, ADR templates
 │
+├── sentinels/                   # Claude Code hook scripts
+│   └── check_work_remaining.py  # Stop hook
 ├── docker-compose.yml           # Full stack Docker Compose
 ├── .env.example                 # Environment variable template
 └── .mcp.json                    # MCP server config for Claude Code
@@ -213,7 +225,8 @@ See `AGENTS.md` for the cross-agent authority reference (loaded automatically vi
 | **CLI** | I | Python 3.11, in-memory data |
 | **Backend API** | II+ | FastAPI, SQLModel, Uvicorn, Alembic |
 | **Database** | II+ | PostgreSQL (Neon) / SQLite |
-| **Frontend** | II+ | Next.js 14, React 18, Tailwind CSS, TypeScript |
+| **Auth** | II+ | Clerk (JWT) |
+| **Frontend** | II+ | Next.js 14, React 18, Tailwind CSS (violet/indigo), TypeScript |
 | **AI Agent** | III+ | OpenAI Agents SDK, FastMCP |
 | **Chatbot UI** | V | Next.js 14, WebSocket, Server-Sent Events |
 | **Containerization** | IV+ | Docker, multi-stage builds |
@@ -259,24 +272,30 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 ```bash
 # Terminal 1: Backend
 cd backend
-python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
-uvicorn main:app --reload --port 8000
+python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
-# Terminal 2: Frontend
+# Terminal 2: Todo frontend
 cd frontend
 npm install && npm run dev
 
-# Terminal 3: AI Agent CLI
+# Terminal 3: Chatbot frontend
+cd chatbot-frontend
+npm install && npm run dev -- --port 3001
+
+# Terminal 4 (optional): AI Agent CLI
 cd agent
 pip install -r requirements.txt
 python -m cli
 ```
 
-- **Frontend**: http://localhost:3000
-- **Backend API**: http://localhost:8000
-- **API Docs (Swagger)**: http://localhost:8000/docs
-- **API Docs (ReDoc)**: http://localhost:8000/redoc
+| Service | URL |
+|---------|-----|
+| **Todo App** | http://localhost:3000 |
+| **AI Chatbot** | http://localhost:3001 |
+| **Backend API** | http://localhost:8000 |
+| **API Docs (Swagger)** | http://localhost:8000/docs |
+| **API Docs (ReDoc)** | http://localhost:8000/redoc |
 
 ---
 
@@ -624,5 +643,6 @@ This project uses **Spec-Driven Development (SDD)**:
 
 ---
 
-**Built with:** FastAPI · Next.js 14 · OpenAI Agents SDK · Kubernetes · Kafka · Dapr
-**SDD:** Spec-Driven Development via SpecKit Plus
+**Built with:** FastAPI · Next.js 14 · OpenAI Agents SDK · Clerk · Kubernetes · Kafka · Dapr
+**Theme:** Violet / Indigo — modern, minimal, AI-powered
+**Workflow:** Spec-Driven Development via SpecKit
